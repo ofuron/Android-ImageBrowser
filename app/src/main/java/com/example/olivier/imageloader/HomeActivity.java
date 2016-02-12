@@ -24,6 +24,7 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
 
     private RecyclerView mImageListView;
     private ImageListAdapter mAdapter;
+    private ImageDataHolder mDataHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +55,8 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
     }
 
     @Override
-    public void onItemClicked(ImageListItem data) {
-        lauchImagePreviewActivity(data);
+    public void onItemClicked(int position) {
+        lauchImagePreviewActivity(position);
     }
 
     @Override
@@ -81,13 +82,15 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
     }
 
     @Override
-    public void onDataLoadedCallback(ArrayList<ImageListItem> data) {
+    public void onDataLoadedCallback(ImageDataHolder data) {
+        mDataHolder = data;
         mAdapter.updateData(data);
     }
 
-    public void lauchImagePreviewActivity(ImageListItem item) {
+    public void lauchImagePreviewActivity(int position) {
         Intent intent = new Intent(this, ImagePreviewActivity.class);
-        intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_ITEM, item);
+        intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_DATA, mDataHolder);
+        intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_POSITION, position);
         startActivity(intent);
     }
 }

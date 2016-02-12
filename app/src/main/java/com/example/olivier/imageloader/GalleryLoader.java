@@ -17,12 +17,12 @@ import java.util.regex.Pattern;
 public class GalleryLoader {
   private static final String TAG = GalleryLoader.class.getSimpleName();
 
-  public static ArrayList<ImageListItem> loadGallery(Context context) {
+  public static ImageDataHolder loadGallery(Context context) {
     final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME};
     final String orderBy = MediaStore.Images.Media._ID + " DESC";
     Cursor cursor = null;
 
-    ArrayList<ImageListItem> imageList = new ArrayList<>();
+    ImageDataHolder imageList = new ImageDataHolder();
 
     try {
       cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns, null, null, orderBy);
@@ -44,7 +44,7 @@ public class GalleryLoader {
             item.setTitle(title);
           }
 
-          imageList.add(item);
+          imageList.getList().add(item);
 
         } while(cursor.moveToNext());
       }

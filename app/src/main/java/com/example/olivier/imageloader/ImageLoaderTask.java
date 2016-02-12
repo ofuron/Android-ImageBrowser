@@ -2,14 +2,22 @@ package com.example.olivier.imageloader;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.Point;
+import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.provider.MediaStore;
 import android.support.annotation.IntDef;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,6 +29,9 @@ import java.net.URL;
  * Created by olivier on 2/10/16.
  */
 public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
+
+  private static final String TAG = GalleryLoader.class.getSimpleName();
+
   /**
    * Callback interface to handle image loaded. Implemented by parent
    */
@@ -39,7 +50,7 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
   private final IImageLoaderListener mListener;
   private int mMode;
 
-  public ImageLoaderTask(IImageLoaderListener listener, ImageView thumbnail, int mode, ContentResolver contentResolver) {
+  public ImageLoaderTask(Context context, IImageLoaderListener listener, ImageView thumbnail, int mode, ContentResolver contentResolver) {
     mListener = listener;
     mImageViewReference = new WeakReference<>(thumbnail);
     mContentResolver = contentResolver;
@@ -51,7 +62,18 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
     ImageListItem item = params[0];
 
     if(mMode == MODE_FULLSCREEN) {
-      return BitmapFactory.decodeFile(item.getImageUrl());
+      try {
+        File f = new File(item.getImageUrl());
+
+        // if image size is too large.Then scale image.
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = false;
+
+        return BitmapFactory.decodeStream(new FileInputStream(f), null, options);
+      } catch (Exception e) {
+        Log.e(TAG, e.toString());
+        return null;
+      }
     } else {
       return MediaStore.Images.Thumbnails.getThumbnail(mContentResolver, item.getId(), MediaStore.Images.Thumbnails.MICRO_KIND, null);
     }
@@ -67,6 +89,16 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
       ImageView thumbnail = mImageViewReference.get();
       if(thumbnail != null) {
         thumbnail.setImageBitmap(bitmap);
+
+        if(mMode == MODE_FULLSCREEN) {
+          Matrix m = thumbnail.getImageMatrix();
+          RectF viewRect = new RectF(0, 0, thumbnail.getWidth(), thumbnail.getHeight());
+          RectF drawableRect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
+
+          m.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
+
+          thumbnail.setImageMatrix(m);
+        }
       }
 
       if(mListener != null) {

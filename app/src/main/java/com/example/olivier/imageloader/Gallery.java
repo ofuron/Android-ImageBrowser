@@ -31,20 +31,20 @@ public class Gallery {
   }
 
   public interface IDataLoadedCallback {
-    void onDataLoadedCallback(ArrayList<ImageListItem> data);
+    void onDataLoadedCallback(ImageDataHolder data);
   }
 
   public void refreshData(final IDataLoadedCallback callback, final Context context) {
     mCallbacks.add(callback);
 
-    AsyncTask<Void, Void, ArrayList<ImageListItem> > loadImagesTask = new AsyncTask<Void, Void, ArrayList<ImageListItem> >() {
+    AsyncTask<Void, Void, ImageDataHolder > loadImagesTask = new AsyncTask<Void, Void, ImageDataHolder >() {
       @Override
-      protected ArrayList<ImageListItem> doInBackground(Void... params) {
+      protected ImageDataHolder doInBackground(Void... params) {
         return GalleryLoader.loadGallery(context);
       }
 
       @Override
-      protected void onPostExecute(ArrayList<ImageListItem> data) {
+      protected void onPostExecute(ImageDataHolder data) {
         if(!mCallbacks.isEmpty()) {
           for( IDataLoadedCallback callback : mCallbacks) {
             callback.onDataLoadedCallback(data);

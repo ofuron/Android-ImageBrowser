@@ -2,17 +2,28 @@ package com.example.olivier.imageloader;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.graphics.RectF;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.widget.ImageView;
 import com.example.olivier.imageloader.ImageLoaderTask.IImageLoaderListener;
 
 public class ImagePreviewActivity extends AppCompatActivity implements IImageLoaderListener {
 
-  public static final String EXTRA_IMAGE_ITEM = "EXTRA_IMAGE_ITEM";
+  public static final String EXTRA_IMAGE_DATA = "EXTRA_IMAGE_DATA";
+  public static final String EXTRA_IMAGE_POSITION = "EXTRA_IMAGE_POSITION";
 
-  private ImageView mImage;
+  private ViewPager mPager;
   private ProgressDialog mLoadingDialog;
+
+  private ScaleGestureDetector mScaleDetector;
+  private float mScaleFactor = 1.f;
+  private Matrix mMatrix = new Matrix();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -20,16 +31,22 @@ public class ImagePreviewActivity extends AppCompatActivity implements IImageLoa
     setContentView(R.layout.activity_image_preview);
 
     Intent intent = getIntent();
-    ImageListItem item = (ImageListItem) intent.getSerializableExtra(EXTRA_IMAGE_ITEM);
+    ImageDataHolder data = (ImageDataHolder) intent.getSerializableExtra(EXTRA_IMAGE_DATA);
+    int position = intent.getIntExtra(EXTRA_IMAGE_POSITION, 0);
 
-    mImage   = (ImageView) findViewById(R.id.image);
+    mPager = (ViewPager) findViewById(R.id.pager);
+    mPager.setAdapter(new ImagePreviewAdapter(this, getContentResolver(), data));
+    mPager.setCurrentItem(position);
 
-    if(mImage != null) {
-      showLoadingDialog();
-      new ImageLoaderTask(this, mImage, ImageLoaderTask.MODE_FULLSCREEN, getContentResolver()).execute(item);
-    }
+    mScaleDetector = new ScaleGestureDetector(this, new ImageScaleListener());
   }
 
+
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    mScaleDetector.onTouchEvent(event);
+    return true;
+  }
 
   private void showLoadingDialog() {
     if (mLoadingDialog == null) {
@@ -47,5 +64,19 @@ public class ImagePreviewActivity extends AppCompatActivity implements IImageLoa
   @Override
   public void onImageLoaded() {
     hideLoadingDialog();
+  }
+
+
+  private class ImageScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+    @Override
+    public boolean onScale(ScaleGestureDetector detector) {
+      mScaleFactor *= detector.getScaleFactor();
+      // Don't let the object get too small or too large.
+      mScaleFactor = Math.max(0.1f, Math.min(mScaleFactor, 5.0f));
+      mMatrix.setScale(mScaleFactor, mScaleFactor);
+      //mImage.setImageMatrix(mMatrix);
+      return true;
+    }
   }
 }
