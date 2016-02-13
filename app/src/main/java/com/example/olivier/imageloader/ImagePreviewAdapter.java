@@ -3,14 +3,11 @@ package com.example.olivier.imageloader;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
-
-import java.util.ArrayList;
 
 public class ImagePreviewAdapter extends PagerAdapter {
 

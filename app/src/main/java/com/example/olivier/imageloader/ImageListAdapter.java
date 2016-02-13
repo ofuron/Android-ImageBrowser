@@ -74,9 +74,9 @@ public class ImageListAdapter extends RecyclerView.Adapter {
     final ImageItemViewHolder vh = (ImageItemViewHolder) holder;
     final ImageListItem item = getImageItemAt(position);
 
-    try{
+    try {
       vh.mTask.cancel(true);
-    }catch(Exception e) {
+    } catch(Exception e) {
       Log.e(TAG, "Failed to cancel request");
     }
 

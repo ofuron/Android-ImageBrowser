@@ -48,6 +48,7 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
   private final WeakReference<ImageView> mImageViewReference;
   private final ContentResolver mContentResolver;
   private final IImageLoaderListener mListener;
+  private final Point mScreenSize = new Point();
   private int mMode;
 
   public ImageLoaderTask(Context context, IImageLoaderListener listener, ImageView thumbnail, int mode, ContentResolver contentResolver) {
@@ -55,6 +56,10 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
     mImageViewReference = new WeakReference<>(thumbnail);
     mContentResolver = contentResolver;
     mMode = mode;
+
+    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    display.getSize(mScreenSize);
   }
 
   @Override
@@ -67,9 +72,17 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
 
         // if image size is too large.Then scale image.
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = false;
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(new FileInputStream(f), null, options);
 
-        return BitmapFactory.decodeStream(new FileInputStream(f), null, options);
+        int scale = 1;
+        while(options.outWidth/scale > mScreenSize.x ||options.outHeight/scale > mScreenSize.y) {
+          scale *=2;
+        }
+
+        BitmapFactory.Options options2 = new BitmapFactory.Options();
+        options2.inSampleSize = scale;
+        return BitmapFactory.decodeStream(new FileInputStream(f), null, options2);
       } catch (Exception e) {
         Log.e(TAG, e.toString());
         return null;
@@ -86,18 +99,18 @@ public class ImageLoaderTask extends AsyncTask<ImageListItem, Void, Bitmap> {
     }
 
     if(mImageViewReference != null && bitmap != null) {
-      ImageView thumbnail = mImageViewReference.get();
-      if(thumbnail != null) {
-        thumbnail.setImageBitmap(bitmap);
+      ImageView image = mImageViewReference.get();
+      if(image != null) {
+        image.setImageBitmap(bitmap);
 
         if(mMode == MODE_FULLSCREEN) {
-          Matrix m = thumbnail.getImageMatrix();
-          RectF viewRect = new RectF(0, 0, thumbnail.getWidth(), thumbnail.getHeight());
+          Matrix m = image.getImageMatrix();
+          RectF viewRect = new RectF(0, 0, image.getWidth(), image.getHeight());
           RectF drawableRect = new RectF(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
           m.setRectToRect(drawableRect, viewRect, Matrix.ScaleToFit.CENTER);
 
-          thumbnail.setImageMatrix(m);
+          image.setImageMatrix(m);
         }
       }
 
