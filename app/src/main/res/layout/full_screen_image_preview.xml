@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="#000000"
-    tools:context="com.example.olivier.imageloader.ImagePreviewActivity">
+    tools:context="com.ofu.app.imageloader.ImagePreviewActivity">
 
     <ImageView
         android:id="@+id/image"

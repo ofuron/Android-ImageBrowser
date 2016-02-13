@@ -1,4 +1,4 @@
-package com.example.olivier.imageloader;
+package com.ofu.app.imageloader;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,15 +1,10 @@
-package com.example.olivier.imageloader;
+package com.ofu.app.imageloader;
 
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Created by olivier on 2/10/16.
