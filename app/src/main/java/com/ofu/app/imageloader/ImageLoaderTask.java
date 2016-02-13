@@ -1,6 +1,5 @@
-package com.example.olivier.imageloader;
+package com.ofu.app.imageloader;
 
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,12 +17,9 @@ import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Created by olivier on 2/10/16.

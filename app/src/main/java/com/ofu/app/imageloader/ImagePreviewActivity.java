@@ -1,17 +1,15 @@
-package com.example.olivier.imageloader;
+package com.ofu.app.imageloader;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.RectF;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.widget.ImageView;
-import com.example.olivier.imageloader.ImageLoaderTask.IImageLoaderListener;
+
+import com.ofu.app.imageloader.ImageLoaderTask.IImageLoaderListener;
 
 public class ImagePreviewActivity extends AppCompatActivity implements IImageLoaderListener {
 
