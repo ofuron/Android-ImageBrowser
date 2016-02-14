@@ -15,6 +15,8 @@ import android.view.Display;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.facebook.imagepipeline.request.BasePostprocessor;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.annotation.Retention;

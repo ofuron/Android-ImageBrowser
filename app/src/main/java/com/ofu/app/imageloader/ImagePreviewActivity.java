@@ -33,7 +33,9 @@ public class ImagePreviewActivity extends AppCompatActivity implements IImageLoa
     int position = intent.getIntExtra(EXTRA_IMAGE_POSITION, 0);
 
     mPager = (ViewPager) findViewById(R.id.pager);
-    mPager.setAdapter(new ImagePreviewAdapter(this, getContentResolver(), data));
+    ImagePreviewAdapter pagerAdapter = new ImagePreviewAdapter(getSupportFragmentManager());
+    pagerAdapter.updateData(data);
+    mPager.setAdapter(pagerAdapter);
     mPager.setCurrentItem(position);
 
     mScaleDetector = new ScaleGestureDetector(this, new ImageScaleListener());
