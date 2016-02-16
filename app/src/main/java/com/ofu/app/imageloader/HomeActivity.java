@@ -10,12 +10,14 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -24,7 +26,7 @@ import java.util.Date;
 public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoadedCallback, ImageListAdapter.OnImageListItemClickListener {
 
   private static final int REQUEST_TAKE_PHOTO = 1;
-  private static final String APP_PICTURE_DIR = "Picool";
+  private static final String APP_PICTURE_DIR = "PicTool";
 
   private Gallery mGallery;
   private RecyclerView mImageListView;
@@ -43,7 +45,9 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
     mAdapter = new ImageListAdapter(this, this);
 
     mImageListView = (RecyclerView) findViewById(R.id.image_listview);
-    mImageListView.setLayoutManager(new LinearLayoutManager(this, android.support.v7.widget.LinearLayoutManager.VERTICAL, false));
+    //mImageListView.setLayoutManager(new LinearLayoutManager(this, android.support.v7.widget.LinearLayoutManager.VERTICAL, false));
+    mImageListView.setLayoutManager(new VarColumnGridLayoutManager(this, (int) getResources().getDimension(R.dimen.grid_item_width)));
+
     mImageListView.setAdapter(mAdapter);
 
     // Get SDCARD image path
@@ -66,6 +70,13 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
     });
   }
 
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    ImagePipeline imagePipeline = Fresco.getImagePipeline();
+    imagePipeline.clearCaches();
+  }
 
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {

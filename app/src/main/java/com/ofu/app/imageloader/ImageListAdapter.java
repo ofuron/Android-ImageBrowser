@@ -1,17 +1,27 @@
 package com.ofu.app.imageloader;
 
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.Point;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.WindowManager;
 import android.widget.TextView;
 
-/**
- * Created by olivier on 2/10/16.
- */
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.common.ResizeOptions;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+
+import java.io.File;
+
+
 public class ImageListAdapter extends RecyclerView.Adapter {
 
   private static final String TAG = ImageListAdapter.class.getSimpleName();
@@ -28,13 +38,13 @@ public class ImageListAdapter extends RecyclerView.Adapter {
    */
   private class ImageItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private TextView mTitle;
-    private ImageView mThumbnail;
+    private SimpleDraweeView mThumbnail;
     private ImageLoaderTask mTask;
 
     public ImageItemViewHolder(View v) {
       super(v);
       mTitle = (TextView) v.findViewById(R.id.title);
-      mThumbnail = (ImageView) v.findViewById(R.id.thumbnail);
+      mThumbnail = (SimpleDraweeView) v.findViewById(R.id.thumbnail);
       v.setOnClickListener(this);
     }
 
@@ -62,7 +72,13 @@ public class ImageListAdapter extends RecyclerView.Adapter {
 
   @Override
   public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    return new ImageItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.image_list_view_item, parent, false));
+    WindowManager wm = (WindowManager) this.mContext.getSystemService(Context.WINDOW_SERVICE);
+    Display display = wm.getDefaultDisplay();
+    Point size = new Point();
+    display.getSize(size);
+
+    ImageItemViewHolder vh = new ImageItemViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.image_grid_view_item, parent, false));
+    return vh;
   }
 
   @Override
@@ -70,16 +86,23 @@ public class ImageListAdapter extends RecyclerView.Adapter {
     final ImageItemViewHolder vh = (ImageItemViewHolder) holder;
     final ImageListItem item = getImageItemAt(position);
 
-    try {
-      vh.mTask.cancel(true);
-    } catch(Exception e) {
-      Log.e(TAG, "Failed to cancel request");
-    }
+    SimpleDraweeView image = vh.mThumbnail;
 
-    vh.mTitle.setText(item.getTitle());
-    vh.mThumbnail.setImageBitmap(null);
-    vh.mTask = new ImageLoaderTask(mContext, null, vh.mThumbnail, ImageLoaderTask.MODE_THUMB, mContext.getContentResolver());
-    vh.mTask.execute(mData.getList().get(position));
+    Uri uri = Uri.fromFile(new File(mData.getList().get(position).getImageUrl()));
+    int size = (int) this.mContext.getResources().getDimension(R.dimen.grid_item_width);
+    ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
+        .setResizeOptions(new ResizeOptions(size, size))
+        .setLocalThumbnailPreviewsEnabled(true)
+        .setImageType(ImageRequest.ImageType.SMALL)
+        .build();
+
+    PipelineDraweeController controller = (PipelineDraweeController)
+        Fresco.newDraweeControllerBuilder()
+            .setImageRequest(request)
+            .setOldController(image.getController())
+            .build();
+    image.setController(controller);
+
   }
 
   @Override

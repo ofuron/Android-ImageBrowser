@@ -9,6 +9,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.imagepipeline.core.ImagePipeline;
 import com.ofu.app.imageloader.ImageLoaderTask.IImageLoaderListener;
 
 public class ImagePreviewActivity extends AppCompatActivity implements IImageLoaderListener {
@@ -41,6 +43,12 @@ public class ImagePreviewActivity extends AppCompatActivity implements IImageLoa
     mScaleDetector = new ScaleGestureDetector(this, new ImageScaleListener());
   }
 
+  @Override
+  protected void onPause() {
+    super.onPause();
+    ImagePipeline imagePipeline = Fresco.getImagePipeline();
+    imagePipeline.clearCaches();
+  }
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
