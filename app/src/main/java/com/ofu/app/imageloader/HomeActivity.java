@@ -3,6 +3,7 @@ package com.ofu.app.imageloader;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -142,7 +143,19 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
   }
 
   public void addPicToGallery(String path) {
-    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+    MediaScannerConnection.scanFile(
+        getApplicationContext(),
+        new String[]{path},
+        null,
+        new MediaScannerConnection.OnScanCompletedListener() {
+          @Override
+          public void onScanCompleted(String s, Uri uri) {
+            refreshGallery();
+          }
+        });
+  }
+
+  public void refreshGallery() {
     mGallery.refreshData(this, this);
   }
 }
