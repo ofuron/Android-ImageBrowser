@@ -1,9 +1,13 @@
 package com.ofu.app.imageloader;
 
+import android.content.ContentValues;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,77 +16,133 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoadedCallback, ImageListAdapter.OnImageListItemClickListener{
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-    private RecyclerView mImageListView;
-    private ImageListAdapter mAdapter;
-    private ImageDataHolder mDataHolder;
+public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoadedCallback, ImageListAdapter.OnImageListItemClickListener {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+  private static final int REQUEST_TAKE_PHOTO = 1;
+  private static final String APP_PICTURE_DIR = "Picool";
 
-        // Create the adapter
-        mAdapter = new ImageListAdapter(this, this);
+  private Gallery mGallery;
+  private RecyclerView mImageListView;
+  private ImageListAdapter mAdapter;
+  private ImageDataHolder mDataHolder;
+  private String mCurrentPhotoPath;
 
-        mImageListView = (RecyclerView) findViewById(R.id.image_listview);
-        mImageListView.setLayoutManager(new LinearLayoutManager(this, android.support.v7.widget.LinearLayoutManager.VERTICAL, false));
-        mImageListView.setAdapter(mAdapter);
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_home);
+    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
 
-        // Get SDCARD image path
-        final Gallery gallery= Gallery.with(this);
-        gallery.refreshData(this, this);
+    // Create the adapter
+    mAdapter = new ImageListAdapter(this, this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-            }
-        });
-    }
+    mImageListView = (RecyclerView) findViewById(R.id.image_listview);
+    mImageListView.setLayoutManager(new LinearLayoutManager(this, android.support.v7.widget.LinearLayoutManager.VERTICAL, false));
+    mImageListView.setAdapter(mAdapter);
 
-    @Override
-    public void onItemClicked(int position) {
-        lauchImagePreviewActivity(position);
-    }
+    // Get SDCARD image path
+    mGallery = Gallery.with(this);
+    mGallery.refreshData(this, this);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+    fab.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (cameraIntent.resolveActivity(getPackageManager()) != null) {
+          File pictureFile = createNewPictureFile();
+          if (pictureFile != null) {
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(pictureFile));
+          }
+          startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO);
         }
+      }
+    });
+  }
 
-        return super.onOptionsItemSelected(item);
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+      addPicToGallery(mCurrentPhotoPath);
+    }
+  }
+
+  @Override
+  public void onItemClicked(int position) {
+    lauchImagePreviewActivity(position);
+  }
+
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    // Inflate the menu; this adds items to the action bar if it is present.
+    getMenuInflater().inflate(R.menu.menu_home, menu);
+    return true;
+  }
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    // Handle action bar item clicks here. The action bar will
+    // automatically handle clicks on the Home/Up button, so long
+    // as you specify a parent activity in AndroidManifest.xml.
+    int id = item.getItemId();
+
+    //noinspection SimplifiableIfStatement
+    if (id == R.id.action_settings) {
+      return true;
     }
 
-    @Override
-    public void onDataLoadedCallback(ImageDataHolder data) {
-        mDataHolder = data;
-        mAdapter.updateData(data);
+    return super.onOptionsItemSelected(item);
+  }
+
+  @Override
+  public void onDataLoadedCallback(ImageDataHolder data) {
+    mDataHolder = data;
+    mAdapter.updateData(data);
+  }
+
+  private static File getSharedDirectory(){
+    return new File(Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DCIM), APP_PICTURE_DIR);
+  }
+
+  public void lauchImagePreviewActivity(int position) {
+    Intent intent = new Intent(this, ImagePreviewActivity.class);
+    intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_DATA, mDataHolder);
+    intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_POSITION, position);
+    startActivity(intent);
+  }
+
+  public File createNewPictureFile() {
+    try {
+      // Get or create shared dir
+      File sharedDir = getSharedDirectory();
+      if (! sharedDir.exists()){
+        if (! sharedDir.mkdirs()){
+          return null;
+        }
+      }
+
+      // Create an image file name
+      String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+      String imageFileName = "JPEG_" + timeStamp + "_";
+      File dataFile = new File(sharedDir.getPath() + File.separator + imageFileName + ".jpg");
+      mCurrentPhotoPath = dataFile.getAbsolutePath();
+      return dataFile;
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
-    public void lauchImagePreviewActivity(int position) {
-        Intent intent = new Intent(this, ImagePreviewActivity.class);
-        intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_DATA, mDataHolder);
-        intent.putExtra(ImagePreviewActivity.EXTRA_IMAGE_POSITION, position);
-        startActivity(intent);
-    }
+    return null;
+  }
+
+  public void addPicToGallery(String path) {
+    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + path)));
+    mGallery.refreshData(this, this);
+  }
 }
