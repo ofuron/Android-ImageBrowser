@@ -150,12 +150,9 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
         new MediaScannerConnection.OnScanCompletedListener() {
           @Override
           public void onScanCompleted(String s, Uri uri) {
-            refreshGallery();
+             mGallery.refreshData(HomeActivity.this, HomeActivity.this);
           }
         });
   }
 
-  public void refreshGallery() {
-    mGallery.refreshData(this, this);
-  }
 }
