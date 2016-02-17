@@ -1,6 +1,9 @@
 package com.ofu.app.imageloader;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by olivier on 2/10/16.
@@ -11,6 +14,7 @@ public class ImageListItem implements Serializable{
   private String imageUrl;
   private String date;
   private Long id;
+  private boolean selected = false;
 
   public String getTitle() {
     return title;
@@ -33,7 +37,14 @@ public class ImageListItem implements Serializable{
   }
 
   public void setDate(String date) {
-    this.date = date;
+    // Create a DateFormatter object for displaying date in specified format.
+    SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
+
+    try {
+      this.date = formatter.format(new Date(Long.valueOf(date)));
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
   }
 
   public Long getId() {
@@ -42,5 +53,13 @@ public class ImageListItem implements Serializable{
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public boolean isSelected() {
+    return selected;
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
   }
 }

@@ -13,7 +13,7 @@ public class GalleryLoader {
   private static final String TAG = GalleryLoader.class.getSimpleName();
 
   public static ImageDataHolder loadGallery(Context context) {
-    final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME};
+    final String[] columns = {MediaStore.Images.Media.DATA, MediaStore.Images.Media._ID, MediaStore.Images.Media.DISPLAY_NAME, MediaStore.Images.Media.DATE_TAKEN};
     final String orderBy = MediaStore.Images.Media._ID + " DESC";
     Cursor cursor = null;
 
@@ -37,6 +37,11 @@ public class GalleryLoader {
           String title = cursor.getString(2);
           if(!TextUtils.isEmpty(title)) {
             item.setTitle(title);
+          }
+
+          String date = cursor.getString(3);
+          if(!TextUtils.isEmpty(date)) {
+            item.setDate(date);
           }
 
           imageList.getList().add(item);

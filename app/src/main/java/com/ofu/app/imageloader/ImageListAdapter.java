@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
@@ -39,13 +40,22 @@ public class ImageListAdapter extends RecyclerView.Adapter {
   private class ImageItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
     private TextView mTitle;
     private SimpleDraweeView mThumbnail;
+    private CheckBox mSelectedCheckBox;
     private ImageLoaderTask mTask;
 
     public ImageItemViewHolder(View v) {
       super(v);
       mTitle = (TextView) v.findViewById(R.id.title);
       mThumbnail = (SimpleDraweeView) v.findViewById(R.id.thumbnail);
+      mSelectedCheckBox = (CheckBox) v.findViewById(R.id.select);
       v.setOnClickListener(this);
+
+      mSelectedCheckBox.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          mData.getList().get(ImageItemViewHolder.this.getAdapterPosition()).setSelected( ((CheckBox) v).isChecked() );
+        }
+      });
     }
 
     @Override
@@ -86,9 +96,10 @@ public class ImageListAdapter extends RecyclerView.Adapter {
     final ImageItemViewHolder vh = (ImageItemViewHolder) holder;
     final ImageListItem item = getImageItemAt(position);
 
-    SimpleDraweeView image = vh.mThumbnail;
+    vh.mTitle.setText(item.getDate());
 
-    Uri uri = Uri.fromFile(new File(mData.getList().get(position).getImageUrl()));
+    SimpleDraweeView image = vh.mThumbnail;
+    Uri uri = Uri.fromFile(new File(item.getImageUrl()));
     int size = (int) this.mContext.getResources().getDimension(R.dimen.grid_item_width);
     ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
         .setResizeOptions(new ResizeOptions(size, size))
