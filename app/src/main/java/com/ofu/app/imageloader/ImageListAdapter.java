@@ -55,9 +55,11 @@ public class ImageListAdapter extends RecyclerView.Adapter {
         public void onClick(View v) {
           final int position = ImageItemViewHolder.this.getAdapterPosition();
           if( ((CheckBox) v).isChecked() ) {
-            mData.addItemToSelected(mData.getList().get(position).getId(), mData.getList().get(position));
+            mData.addItemToSelected(getImageListItemAt(position).getId(), getImageListItemAt(position));
+            getImageListItemAt(position).setSelected(true);
           } else {
-            mData.removeItemFromSelected(mData.getList().get(position).getId());
+            mData.removeItemFromSelected(getImageListItemAt(position).getId());
+            getImageListItemAt(position).setSelected(false);
           }
         }
       });
@@ -99,9 +101,10 @@ public class ImageListAdapter extends RecyclerView.Adapter {
   @Override
   public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
     final ImageItemViewHolder vh = (ImageItemViewHolder) holder;
-    final ImageListItem item = getImageItemAt(position);
+    final ImageListItem item = getImageListItemAt(position);
 
     vh.mTitle.setText(item.getDate());
+    vh.mSelectedCheckBox.setChecked(item.isSelected());
 
     SimpleDraweeView image = vh.mThumbnail;
     Uri uri = Uri.fromFile(new File(item.getImageUrl()));
@@ -109,6 +112,7 @@ public class ImageListAdapter extends RecyclerView.Adapter {
     ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
         .setResizeOptions(new ResizeOptions(size, size))
         .setLocalThumbnailPreviewsEnabled(true)
+        .setAutoRotateEnabled(true)
         .setImageType(ImageRequest.ImageType.SMALL)
         .build();
 
@@ -129,7 +133,7 @@ public class ImageListAdapter extends RecyclerView.Adapter {
   }
 
   //Get item by position in adapter.
-  private ImageListItem getImageItemAt(int positionInAdapter) {
+  private ImageListItem getImageListItemAt(int positionInAdapter) {
     return mData.getList().get(positionInAdapter);
   }
 }
