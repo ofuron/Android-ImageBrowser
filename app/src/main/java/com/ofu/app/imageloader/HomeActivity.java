@@ -1,6 +1,7 @@
 package com.ofu.app.imageloader;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +24,7 @@ import com.facebook.imagepipeline.core.ImagePipeline;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoadedCallback, ImageListAdapter.OnImageListItemClickListener {
 
@@ -107,9 +110,42 @@ public class HomeActivity extends AppCompatActivity implements Gallery.IDataLoad
     //noinspection SimplifiableIfStatement
     if (id == R.id.action_settings) {
       return true;
+    } else if (id == R.id.action_share) {
+      onActionShare();
     }
 
     return super.onOptionsItemSelected(item);
+  }
+
+  private void onActionShare() {
+    Map<Long, ImageListItem> selectedItems = mDataHolder.getSelectedItems();
+    if(selectedItems == null || selectedItems.isEmpty()) {
+      showShareActionErrorDialog();
+    } else {
+      AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+      alertDialog.setTitle("Preparing to send");
+      alertDialog.setMessage("Do you want to send " + selectedItems.size() + " images");
+      alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "Send",
+              new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                  dialog.dismiss();
+                }
+              });
+      alertDialog.show();
+    }
+  }
+
+  private void showShareActionErrorDialog() {
+    AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+    alertDialog.setTitle("Warning");
+    alertDialog.setMessage("You should select at least one image to share");
+    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+            new DialogInterface.OnClickListener() {
+              public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+              }
+            });
+    alertDialog.show();
   }
 
   @Override

@@ -14,7 +14,6 @@ public class ImageListItem implements Serializable{
   private String imageUrl;
   private String date;
   private Long id;
-  private boolean selected = false;
 
   public String getTitle() {
     return title;
@@ -53,13 +52,5 @@ public class ImageListItem implements Serializable{
 
   public void setId(Long id) {
     this.id = id;
-  }
-
-  public boolean isSelected() {
-    return selected;
-  }
-
-  public void setSelected(boolean selected) {
-    this.selected = selected;
   }
 }

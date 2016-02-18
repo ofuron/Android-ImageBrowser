@@ -53,7 +53,12 @@ public class ImageListAdapter extends RecyclerView.Adapter {
       mSelectedCheckBox.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-          mData.getList().get(ImageItemViewHolder.this.getAdapterPosition()).setSelected( ((CheckBox) v).isChecked() );
+          final int position = ImageItemViewHolder.this.getAdapterPosition();
+          if( ((CheckBox) v).isChecked() ) {
+            mData.addItemToSelected(mData.getList().get(position).getId(), mData.getList().get(position));
+          } else {
+            mData.removeItemFromSelected(mData.getList().get(position).getId());
+          }
         }
       });
     }
